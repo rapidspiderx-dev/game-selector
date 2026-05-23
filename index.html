@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>KOSUKE SHIRO - Backoffice Game Selector</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Passcode Overlay -->
+  <div id="authOverlay" class="auth-overlay">
+    <div class="auth-box">
+      <div class="auth-logo">KOSUKE SHIRO</div>
+      <div class="auth-subtitle">Backoffice Game Selector</div>
+      <div class="auth-title">กรุณาใส่รหัสผ่านเพื่อเข้าใช้งาน</div>
+      <div class="pin-display">
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+      </div>
+      <div class="pin-pad">
+        <button onclick="pressPin('1')">1</button>
+        <button onclick="pressPin('2')">2</button>
+        <button onclick="pressPin('3')">3</button>
+        <button onclick="pressPin('4')">4</button>
+        <button onclick="pressPin('5')">5</button>
+        <button onclick="pressPin('6')">6</button>
+        <button onclick="pressPin('7')">7</button>
+        <button onclick="pressPin('8')">8</button>
+        <button onclick="pressPin('9')">9</button>
+        <button class="pin-btn-clear" onclick="clearPin()">C</button>
+        <button onclick="pressPin('0')">0</button>
+        <button class="pin-btn-back" onclick="backspacePin()">⌫</button>
+      </div>
+      <div id="authError" class="auth-error">รหัสผ่านไม่ถูกต้อง!</div>
+    </div>
+  </div>
+
+  <!-- Dashboard App -->
+  <div id="appContainer" class="app-container" style="display: none;">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-title">KOSUKE SHIRO</div>
+        <div class="brand-subtitle">Backoffice Game Selector</div>
+      </div>
+      
+      <!-- Search Box & Filter -->
+      <div class="search-wrap">
+        <input id="searchInput" class="search-input" placeholder="ค้นหา Index (เช่น 12) หรือ ชื่อเกม / CUSA" autocomplete="off" />
+        <button id="searchClear" class="search-clear">&times;</button>
+      </div>
+      <div class="filter-wrap" style="margin-top: 10px; margin-bottom: 4px;">
+        <select id="shopFilterSelect" class="shop-filter-select">
+          <option value="inshop" selected>🎮 เฉพาะเกมในร้าน (inShop = 1)</option>
+          <option value="all">📁 ทุกเกมในระบบ (ทั้งหมด)</option>
+        </select>
+      </div>
+      
+      <!-- Search Results Dropdown -->
+      <div id="searchResults" class="search-results"></div>
+    </header>
+
+    <main class="main-content">
+      <!-- Calculator Summary Strip -->
+      <section class="calc-card">
+        <div class="calc-header">
+          <div class="calc-title">พื้นที่จัดเก็บข้อมูล</div>
+          <select id="capacitySelect" class="capacity-select">
+            <option value="500GB">500 GB (426 GB Usable)</option>
+            <option value="1TB" selected>1 TB (852 GB Usable)</option>
+            <option value="2TB">2 TB (1704 GB Usable)</option>
+            <option value="3TB">3 TB (2556 GB Usable)</option>
+            <option value="4TB">4 TB (3408 GB Usable)</option>
+            <option value="6TB">6 TB (5112 GB Usable)</option>
+            <option value="8TB">8 TB (6816 GB Usable)</option>
+            <option value="custom">กำหนดเอง (GB)</option>
+          </select>
+          <input id="customCapacityInput" class="custom-capacity-input" type="number" placeholder="ระบุขนาด (GB)" style="display: none;" />
+        </div>
+        
+        <div class="calc-progress-wrap">
+          <div class="progress-bar-bg">
+            <div id="progressBar" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+          <div class="calc-stats">
+            <span id="statSize">0.0 GB / 852.0 GB</span>
+            <span id="statPercent">0.0%</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cart/Priority List Section -->
+      <section class="cart-section">
+        <div class="section-header">
+          <div class="section-title">ลำดับเกมที่เลือก (ตะกร้า) <span id="cartCount" class="badge-count">0</span></div>
+          <button id="clearCartButton" class="btn-clear-cart">ล้างทั้งหมด</button>
+        </div>
+        <div id="cartList" class="cart-list"></div>
+      </section>
+
+      <!-- Export & Output Section -->
+      <section class="export-section">
+        <div class="section-header">
+          <div class="section-title">ผลลัพธ์การคัดเลือก</div>
+        </div>
+        
+        <div class="export-box">
+          <label class="export-label">รหัส Index ของเกมที่เลือก</label>
+          <textarea id="indexesOutput" class="export-textarea" readonly placeholder="000123,000456..."></textarea>
+          <button id="btnCopyIndexes" class="btn-primary">คัดลอกรหัส Index</button>
+        </div>
+
+        <div class="export-box" style="margin-top: 15px;">
+          <label class="export-label">สรุปรายงานสำหรับลูกค้า (Log)</label>
+          <textarea id="reportOutput" class="export-textarea" readonly style="height: 160px;"></textarea>
+          <button id="btnCopyReport" class="btn-secondary">คัดลอกรายงานสรุป</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Image Modal Popup Overlay -->
+  <div id="imageModal" class="image-modal" onclick="closeModal()">
+    <div class="modal-wrapper" onclick="event.stopPropagation()">
+      <img id="modalImg" class="modal-img-content" src="" />
+      <div id="modalCaption" class="modal-caption"></div>
+      <button id="modalCheatBtn" class="modal-cheat-btn" style="display: none;">🔑 ดูสูตรโกง (Cheats)</button>
+    </div>
+  </div>
+
+  <!-- Cheat Viewer Modal Overlay -->
+  <div id="cheatModal" class="cheat-modal" onclick="closeCheatModal()">
+    <div class="cheat-modal-content" onclick="event.stopPropagation()">
+      <div class="cheat-modal-header">
+        <div id="cheatModalTitle" class="cheat-modal-title">สูตรโกง</div>
+        <button class="cheat-modal-close" onclick="closeCheatModal()">&times;</button>
+      </div>
+      <div id="cheatCusaTabs" class="cheat-cusa-tabs"></div>
+      <div id="cheatBlocksContainer" class="cheat-blocks-container"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
